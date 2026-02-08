@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pour Toi ♥</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #ffc3d5 0%, #ff9ec4 50%, #ffb3d9 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Floating hearts animation */
+        .heart-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 30px;
+            opacity: 0;
+            animation: float 6s infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Lock Screen */
+        .lock-screen {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.3);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+        }
+
+        .lock-screen.hidden {
+            display: none;
+        }
+
+        .lock-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        h1 {
+            color: #ff69b4;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #ff1493;
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            text-align: center;
+            border: 3px solid #ffb3d9;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            transition: all 0.3s;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: #ff69b4;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .unlock-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .unlock-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+        }
+
+        .error-msg {
+            color: #ff1493;
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .error-msg.show {
+            opacity: 1;
+        }
+
+        .hint {
+            margin-top: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: none;
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            width: 90%;
+        }
+
+        .main-content.active {
+            display: block;
+            animation: fadeIn 1s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255, 105, 180, 0.2);
+        }
+
+        .header h2 {
+            font-size: 42px;
+            color: #ff69b4;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #ff1493;
+            font-size: 20px;
+            font-style: italic;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(255, 105, 180, 0.3);
+        }
+
+        .card-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            color: #ff69b4;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #ff69b4;
+            background: none;
+            border: none;
+        }
+
+        .modal-content h2 {
+            color: #ff69b4;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .letter {
+            line-height: 1.8;
+            color: #333;
+            font-size: 16px;
+            text-align: justify;
+        }
+
+        .letter p {
+            margin-bottom: 15px;
+        }
+
+        .letter-date {
+            text-align: right;
+            color: #ff69b4;
+            font-style: italic;
+            margin-top: 20px;
+        }
+
+        .memory-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff0f5;
+            border-radius: 10px;
+            border-left: 4px solid #ff69b4;
+        }
+
+        .memory-date {
+            color: #ff69b4;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .playlist {
+            list-style: none;
+        }
+
+        .playlist li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #fff0f5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .playlist li:before {
+            content: "🎵";
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Hearts Background -->
+    <div class="heart-bg" id="heartBg"></div>
+
+    <!-- Lock Screen -->
+    <div class="lock-screen" id="lockScreen">
+        <div class="lock-icon">🔒</div>
+        <h1>Cherche le code</h1>
+        <p class="subtitle">Entre le code secret pour découvrir...</p>
+        <input 
+            type="password" 
+            class="code-input" 
+            id="codeInput" 
+            placeholder="Code Secret"
+            maxlength="10"
+        >
+        <button class="unlock-btn" onclick="checkCode()">Déverrouiller ♥</button>
+        <p class="error-msg" id="errorMsg">Code incorrect, essaie encore mon amour ♥</p>
+        <p class="hint">Indice: Instagram ♥</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="header">
+            <h2>Bien vue t'a trouver le code mon coeur ♥</h2>
+            <p>J'espere que ca va te plaire..</p>
+        </div>
+
+        <div class="content-grid">
+            <div class="card" onclick="openModal('letters')">
+                <div class="card-icon">💌</div>
+                <h3>Lettres d'Amour</h3>
+                <p>Des mots rien que pour toi</p>
+            </div>
+
+            <div class="card" onclick="openModal('memories')">
+                <div class="card-icon">📸</div>
+                <h3>Moments inoubliables</h3>
+                <p>Quelque dates importantes</p>
+            </div>
+
+            <div class="card" onclick="openModal('reasons')">
+                <div class="card-icon">❤️</div>
+                <h3>Pourquoi Je T'aime</h3>
+                <p>100 raisons et bien plus encore</p>
+            </div>
+
+            <div class="card" onclick="openModal('playlist')">
+                <div class="card-icon">🎵</div>
+                <h3>Notre Playlist</h3>
+                <p>Les chansons qui nous représentent</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">×</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Code secret
+        const SECRET_CODE = "29/01/26";
+
+        // Create floating hearts
+        function createHearts() {
+            const heartBg = document.getElementById('heartBg');
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '♥';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 6 + 's';
+                heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                heartBg.appendChild(heart);
+            }
+        }
+
+        createHearts();
+
+        // Check code
+        function checkCode() {
+            const input = document.getElementById('codeInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (input === SECRET_CODE) {
+                document.getElementById('lockScreen').classList.add('hidden');
+                document.getElementById('mainContent').classList.add('active');
+            } else {
+                errorMsg.classList.add('show');
+                document.getElementById('codeInput').value = '';
+                setTimeout(() => {
+                    errorMsg.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Allow Enter key
+        document.getElementById('codeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkCode();
+            }
+        });
+
+        // Modal content data
+        const modalData = {
+            letters: {
+                title: "💌 Mes Lettres d'Amour",
+                content: `
+                    <div class="letter">
+                        <h3 style="color: #ff69b4; margin-bottom: 15px;">Ma Première Lettre</h3>
+                        <p>Mon amour,</p>
+                        <p>Il y a des moments ou les mots ne sont pas suffisant pour exprimer ce que l'on ressent.J'aurais toujours ce "mood" qui est indescriptible quand je te parle que sa soit par messages ou dans la vrai vie.Enfaite j'arrive juste pas a decrire ce que je ressens pour toi, mais tout ce que je sais c'est que ses de l'amour.</p>
+                        <p>Je savais pas vraiment ce que c'etait l'amour sain jusqu'a ce que je regarde au alentours et je vois une magnifique fille au cheveux rouge.</p>
+                        <p>Je te remercie toi et t'es cheveux y compris vu que maintenant je connais l'amour sain grace a toi donc je continue avec toi.</p>
+                        <p>Je t'aime plus que tout au monde.</p>
+                        <p class="letter-date">Avec tout mon amour, aujourd'hui et pour toujours ♥</p>
+                    </div>
+                `
+            },
+            memories: {
+                title: "On peut toujours en rajouter..🫠",
+                content: `
+                    <div class="memory-item">
+                        <div class="memory-date">🌟 Notre Première Rencontre</div>
+                        <p>Le jour ou je suis revenu de stage et que j'etais aller te voir tout heureux et tout, la premiere fois ou j'ai vu t'es yeux de pres c'etait magnifique et ce l'est toujours.</p>
+                    </div>
+                    <div class="memory-item">
+                        <div class="memory-date">💕 Notre Premier Bisous</div>
+                        <p>J'etait perdu sur le coup mais j'ai ultra kiffer j'en avais meme des papillons dans le ventre et j'en est toujours autant a chaque bisous.</p>
+                    </div>
+                    <div class="memory-item">
+                        <div class="memory-date">🧸 Notre premiere pause du mardi</div>
+                        <p>Je m'en souviens comme si c'etait hier, on s'etait assis en haut du batiment f et t'es venu t'assoire coller a moi.J'ai rien dit mais j'ai kiffer.</p>
+                    </div>
+                    <div class="memory-item">
+                        <div class="memory-date">🤭 Notre premiers calins</div>
+                        <p>Je m'en rappele j'etait stresser un peu beaucoup meme et je crois bien que notre premiers calin on la fait grace a un message..mais j'ai quand meme kiffer sa appaise.</p>
+                    </div>
+                `
+            },
+            reasons: {
+                title: "❤️ Les choses que j'aime avec toi",
+                content: `
+                    <div class="letter">
+                        <ol style="line-height: 2;">
+                            <li>La façon dont je te cherche direct du regard dès que je suis dans le hall</li>
+                            <li>Ton sourire quand tu m'aperçois enfin au milieu de tout le monde</li>
+                            <li>Nos discussions de 15 minutes qui passent beaucoup trop vite</li>
+                            <li>Ta main qui cherche la mienne quand on marche</li>
+                            <li>Quand tu me racontes les potins ou les trucs nuls qui se sont passés dans ta classe</li>
+                            <li>Le fait que tu sois mon "bol d'air" entre deux cours compliqués</li>
+                            <li>La petite moue que tu fais quand tu sais qu'on va devoir retourner en cours</li>
+                            <li>Ton parfum qui reste sur moi après un calin</li>
+                            <li>Le chemin jusqu'à l'arrêt de bus c'est mon moment préféré de la journée</li>
+                            <li>Ta façon de me tenir le bras quand on marche ensemble</li>
+                            <li>La manière dont tu me racontes ta journée en faisant plein de gestes</li>
+                            <li>Tes mains que je dois réchauffer parce qu'elles sont toujours gelées</li>
+                            <li>Le moment où on voit ton bus arriver et que j'ai déjà envie de te revoir</li>
+                            <li>Parce que peu importe ma journée, la terminer avec toi change tout</li>
+                            <li>La notification de ton message qui fait vibrer mon tel le soir</li>
+                            <li>Tes vocaux super longs où tu m'expliques tes problèmes</li>
+                            <li>Ta façon de t'habiller (tu as toujours les meilleures tenues)</li>
+                            <li>Tes cheveux, même quand tu dis qu'ils sont "nuls" aujourd'hui</li>
+                            <li>Ton rire qui me fait rire direct</li>
+                            <li>Ton odeur, c'est mon truc préféré au monde</li>
+                            <li>Ta répartie qui me laisse parfois sans voix</li>
+                            <li>Ton côté un peu têtu (les dinosaurs sa rugis.)</li>
+                            <li>Ton honnêteté, tu ne joues jamais de rôle</li>
+                            <li>Je me sens moi-même quand je suis avec toi</li>
+                            <li>Le fait qu'on arrive à être proches même si on n'est pas dans la même classe</li>
+                            <li>La fierté que j'ai quand je marche à tes côtés dans le lycée</li>
+                            <li>Tu es ma meilleure amie en plus d'être ma copine</li>
+                            <li>Le fait qu'on se soutienne pour les cours</li>
+                            <li>On ne s'ennuie jamais même pour 15 minutes de pause</li>  
+                            <li>Le futur qu'on s'imagine ensemble</li>
+                            <li>Ta façon de me regarder</li>
+                            <li>Tu sais me calmer quand je suis énervé contre un prof</li>
+                            <li>Tu es unique</li>
+                            <li>Tous les "je t'aime" qu'on s'échange</li>
+                            <li>Ta manière de me dire "fais attention à toi"</li>
+                            <li>Le fait que tu retiennes des détails que j'ai oubliés</li>
+                            <li>Tu me rends meilleur</li>
+                            <li>Ton courage</li>
+                            <li>Tu as changé ma vision du lycée</li>
+                            <li>Ta tendresse à l'arrêt de bus</li>
+                            <li>Tu es mon point de repère</li>
+                            <li>Je suis accro à ton sourire</li>
+                            <li>Tu es ma priorité</li>
+                            <li>Tu me fais rire même quand je n'ai pas envie</li>
+                            <li>Chaque jour avec toi est une chance</li>
+                            <li>Ta voix qui me rassure</li>
+                            <li>La petite pointe de jalousie quand je sais que tu rigoles avec d'autres gens en cours alors que je ne suis pas là</li>
+                            <li>Nos messages "sous la table" quand on s'ennuie chacun dans notre classe</li>
+                            <li>La manière dont tu t'accroches à mon bras</li>
+                            <li>Nos silences qui ne sont jamais gênants parce qu'on est juste bien ensemble</li>
+                            <li>Le fait que tu ne cherches jamais à impressionner les gens "populaires" du lycée</li>
+                            <li>Tes mains qui cherchent toujours la chaleur de mes poches</li>
+                            <li>Tu es la première personne que j'ai envie de voir le matin</li>
+                            <li>Tu rends les journées de 8h de cours supportables</li>
+                            <li>Le fait que tu connaisses mes pires défauts et que tu restes quand même</li>
+                            <li>Le fait que tu sois ma "safe place"</li>
+                            <li>Tu es aussi drôle que belle</li>
+                            <li>Ta loyauté envers nous, peu importe ce que les autres disent</li>
+                            <li>La manière dont tu me manques alors qu'on s'est quittés il y a 5 minutes</li>
+                            <li>Le sentiment d'être "chez moi" dès que je suis à tes côtés</li>
+                            <li>Ta voix qui calme direct mon stress</li>
+                            <li>Parce que même si on n'est pas dans la même classe, tu occupes toutes mes pensées</li>
+                            <li>La façon dont tu râles contre ton emploi du temps</li>
+                            <li>Quand tu m'envoies un message pour me dire qu'un prof est absent et qu'on va pouvoir se voir plus tôt</li>
+                            <li>La façon dont tu me racontes les dramas de ta classe comme si c'était une série Netflix</li>
+                            <li>Quand on marche vers l'arrêt de bus et que tu me racontes ce que tu vas manger en rentrant</li>
+                            <li>Ton côté "maman" qui vérifie si j'ai bien manger</li>
+                            <li>uand tu me piques mon téléphone pour prendre 50 selfies dedans(jte fait passer un message)</li>
+                            <li>Ton côté protecteur quand tu sens que je suis de mauvaise humeur</li>
+                            <li>Ta façon de dire mon prénom</li>
+                            <li>La façon dont tu me manques déjà alors que le bus vient juste de fermer ses portes</li>
+                            <li>Parce que peu importe le stress du lycée tu restes mon moment préféré de la journée</li>
+                            <li>Ton style avec ton manteau d'hiver qui te rend trop mignonne</li>
+                            <li>Ta façon de critiquer le menu de la cantine</li>
+                            <li>Ton côté un peu "geek" sur certains sujets</li>
+                            <li>Le fait que tu ne cherches pas à être une autre personne pour plaire aux gens du lycée</li>
+                            <li>La façon dont tu gères les moments de silence sans que ce soit gênant</li>
+                            <li>Le fait que tu sois la seule personne qui arrive à me faire rire après une journée pourrie</li>
+                            <li>Ta façon de dire "allô" quand je t'appelle le soir, avec cette petite voix douce</li>
+                            <li>La façon dont tu me rassures sur mon futur(il y a toi dedans)</li>
+                            <li>Tu es la plus belle chose qui me soit arrivée au lycée</li>
+                            <li>La douceur de tes mains quand on attend le bus</li>
+                            <li>Tu es la pièce manquante de mes journées</li>
+                            <li>La façon dont tu me regardes quand on se dit au revoir</li>
+                            <li>Ta voix qui reste dans ma tête pendant mes heures de cours</li>
+                            <li>Ton excitation quand tu me parles d'une nouvelle série que tu as commencée</li>
+                            <li>Ta façon de dire "grave" quand tu es d'accord avec moi</li>
+                            <li>La force que tu as pour supporter les journées de 8h à 18h sans perdre ton sourire</li>
+                            <li>Ton rire un peu nerveux quand tu es intimidée</li>
+                            <li>Le fait que tu sois toujours prête à me défendre si quelqu'un dit du mal de moi</li>
+                            <li>Ton message pour me dire que tu es bien rentrée chez toi</li>
+                            <li>Le fait que tu saches me faire rire par message même quand je suis de mauvais humeurs</li>
+                            <li>Ta voix toute douce quand tu m'appelles juste avant de dormir</li>
+                            <li>Quand tu m'envoies un reel et que c'est ecrit "us??"</li>
+                            <li>La façon dont tu me motives à être meilleur</li>
+                            <li>La façon dont tu râles contre la météo quand il pleut et qu'on va devoir attendre le bus sous la pluie</li>
+                            <li>Ta manie de tripoter la lanière de mon sac</li>
+                            <li>Le fait que tu sois la seule personne qui arrive à me faire poser mon téléphone pour t'écouter vraiment</li>
+                            <li>Quand tu me dis que tu as hâte d'être à demain matin juste pour me voir à la pause</li>
+                            <li>Tout sa que avec toi et pour toujours.</li>
+                            
+                        </ol>
+                    </div>
+                `
+            },
+            playlist: {
+                title: "🎵 Notre Playlist d'Amour",
+                content: `
+                    <ul class="playlist">
+                        <li><strong>Amour Plastique</strong> - Videoclub<br><small>
+</small></li>
+                        <li><strong>911</strong> - Damso<br><small>Evidemment du Damso</small></li>
+<li><strong>T'a voulu s'avoir le code j'ai pas terminer les musique</strong> -<br><small></small></li>
+                    </ul>
+                `
+            }
+        };
+
+        function openModal(section) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            const data = modalData[section];
+            
+            modalBody.innerHTML = `
+                <h2>${data.title}</h2>
+                ${data.content}
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
